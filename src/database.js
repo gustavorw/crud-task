@@ -40,6 +40,20 @@ class Database {
 
         return db[table] || [];
     }
+
+    async update(table, id, data) {
+        let db = await this.read();
+        const rowIndex = db[table].findIndex(row => row.id === id);
+
+        if (rowIndex === -1) {
+            return null;
+        }
+        let rows = db[table];
+        rows[rowIndex] = { id, ...data, updated_at: new Date().toISOString() };
+        db[table] = rows;
+        await this.write(db);
+        return rows[rowIndex];
+    }
 }
 
 const db = new Database();

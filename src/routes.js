@@ -1,6 +1,7 @@
 import { db } from './database.js';
 import { randomUUID } from 'node:crypto';
 import { buildRoutePath } from './utils/build-route-path.js';
+import path from 'node:path';
 
 export const routes = [
     {
@@ -24,10 +25,36 @@ export const routes = [
         method: 'GET',
         path: buildRoutePath('/tasks'),
         handler: async (req, res) => {
-            const {search} = req.query;
-            const tasks = await db.select('tasks', search ? {title: search, description: search } : null);
+            const { search } = req.query;
+            const tasks = await db.select('tasks', search ? { title: search, description: search } : null);
             res.writeHead(200);
             return res.end(JSON.stringify(tasks));
         }
+    },
+    {
+        method: 'PUT',
+        path: buildRoutePath('/tasks/:id'),
+        handler: async (req, res) => {
+            const { id } = req.params;
+            if (!id) {
+                res.writeHead(400);
+                return res.end(JSON.stringify({ error: 'ID is required' }));
+            }
+            const { title, description, completed_at } = req.body || {};
+            if (title === undefined && description === undefined) {
+                res.writeHead(400);
+                return res.end(JSON.stringify({ error: 'Invalid body' }));
+            }
+            const task = await db.update('tasks', id, { title, description, completed_at });
+            if (task) {
+                res.writeHead(200);
+                return res.end(JSON.stringify(task));
+            }
+            res.writeHead(404);
+            return res.end(JSON.stringify({ error: 'Task not found' }));
+
+
+        }
+
     },
 ];
