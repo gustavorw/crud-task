@@ -1,10 +1,11 @@
 import { db } from './database.js';
 import { randomUUID } from 'node:crypto';
+import { buildRoutePath } from './utils/build-route-path.js';
 
 export const routes = [
     {
         method: 'POST',
-        path: '/tasks',
+        path: buildRoutePath('/tasks'),
         handler: async (req, res) => {
             const { title, description, } = req.body || {};
 
@@ -21,9 +22,10 @@ export const routes = [
     },
     {
         method: 'GET',
-        path: '/tasks',
+        path: buildRoutePath('/tasks'),
         handler: async (req, res) => {
-            const tasks = await db.select('tasks');
+            const {search} = req.query;
+            const tasks = await db.select('tasks', search ? {title: search, description: search } : null);
             res.writeHead(200);
             return res.end(JSON.stringify(tasks));
         }

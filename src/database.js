@@ -28,8 +28,16 @@ class Database {
 
         return row;
     }
-    async select(table) {
+    async select(table, search) {
         const db = await this.read();
+        if (search) {
+            return db[table].filter(row => {
+                return Object.entries(search).some(([key, value]) => {
+                    return row[key].toLowerCase().includes(value.toLowerCase());
+                })
+            })
+        }
+
         return db[table] || [];
     }
 }
