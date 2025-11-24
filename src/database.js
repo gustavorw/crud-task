@@ -49,10 +49,23 @@ class Database {
             return null;
         }
         let rows = db[table];
-        rows[rowIndex] = { id, ...data, updated_at: new Date().toISOString() };
+        rows[rowIndex] = { ...rows[rowIndex], ...data, updated_at: new Date().toISOString() };
         db[table] = rows;
         await this.write(db);
         return rows[rowIndex];
+    }
+
+    async delete(table, id) {
+        let db = await this.read();
+        const rowIndex = db[table].findIndex(row => row.id === id);
+
+        if (rowIndex === -1) {
+            return false;
+        }
+
+        db[table].splice(rowIndex, 1);
+        await this.write(db);
+        return true;
     }
 }
 

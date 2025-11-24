@@ -57,4 +57,41 @@ export const routes = [
         }
 
     },
+    {
+        method: 'DELETE',
+        path: buildRoutePath('/tasks/:id'),
+        handler: async (req, res) => {
+            const { id } = req.params;
+            if (!id) {
+                res.writeHead(400);
+                return res.end(JSON.stringify({ error: 'ID is required' }));
+            }
+            const isDeleted = await db.delete('tasks', id);
+            if (isDeleted) {
+                res.writeHead(204);
+                return res.end();
+            }
+            res.writeHead(404);
+            return res.end(JSON.stringify({ error: 'Task not found' }));
+        }
+    }, {
+        method: 'PATCH',
+        path: buildRoutePath('/tasks/:id/complete'),
+        handler: async (req, res) => {
+            const { id } = req.params;
+            if (!id) {
+                res.writeHead(400);
+                return res.end(JSON.stringify({ error: 'ID is required' }));
+            }
+            
+
+            const task = await db.update('tasks', id, { completed_at: new Date().toISOString() });
+            if (task) {
+                res.writeHead(200);
+                return res.end(JSON.stringify(task));
+            }
+            res.writeHead(404);
+            return res.end(JSON.stringify({ error: 'Task not found' }));
+        }
+    }
 ];
