@@ -8,6 +8,17 @@ export const routes = [
         method: 'POST',
         path: buildRoutePath('/tasks'),
         handler: async (req, res) => {
+            const tasks = req.body;
+            console.log(Array.isArray(tasks))
+            if (Array.isArray(new Array(tasks))) {
+
+                for await (const task of tasks) {
+                    const { title, description } = task;
+                    await db.insert('tasks', { id: randomUUID(), title, description });
+
+                }
+                return res.end(JSON.stringify({ 'message': 'upload success' })).writeHead(201);
+            }
             const { title, description, } = req.body || {};
 
             if (!title || !description) {
@@ -83,7 +94,7 @@ export const routes = [
                 res.writeHead(400);
                 return res.end(JSON.stringify({ error: 'ID is required' }));
             }
-            
+
 
             const task = await db.update('tasks', id, { completed_at: new Date().toISOString() });
             if (task) {
